@@ -50,6 +50,11 @@ asyncio.run(main())
 
 ### Simple bot usage
 ```python
+import asyncio
+import httpx
+from pyrocketbot import RocketBot
+from commands.handler import MainCommandHandler
+
 async def main():
     async with httpx.AsyncClient() as client:
         bot = RocketBot(username, password, server_url=server, client=client)
