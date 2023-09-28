@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timedelta
 from commands.base import CommandHandler
+import csv
 
 file_paths = [
     "data/cloudAdminSchedule.json",
@@ -59,3 +60,34 @@ class CohortDueDates(CommandHandler):
         
         combined_due_dates = "\n\n".join(all_due_dates)
         await self.bot.send_message(message['rid'], combined_due_dates)
+
+    async def class_schedule(self, message, match_list=None):
+        csv_file_path = "data/class_schedule.csv"
+        with open(csv_file_path, 'r') as f:
+            reader = csv.DictReader(f)
+            class_data = [row for row in reader]
+
+        current_date = datetime.now().date()
+        current_day = current_date.strftime('%A')  # Get the current day name (e.g., "Tuesday")
+
+        # Filter for class dates that fall within this week or match the current day
+        relevant_classes = []
+        for row in class_data:
+            class_date_str = f"{row['Date']} {current_date.year}"  # Append the current year
+            class_date = datetime.strptime(class_date_str, '%b %d %Y').date()
+            
+            if current_day in ["Tuesday", "Thursday", "Friday"] and class_date == current_date:
+                relevant_classes.append(row)
+            # If any class falls within this week
+            elif current_date <= class_date <= current_date + timedelta(days=7):
+                relevant_classes.append(row)
+
+        if not relevant_classes:
+            response = "No classes scheduled for today or this week."
+        else:
+            class_messages = []
+            for row in relevant_classes:
+                class_messages.append(f"Day: {row['Day']}\nDate: {row['Date']}\nRoom: {row['Room']}\n-----------------------------")
+            response = "\n".join(class_messages)
+
+        await self.bot.send_message(message['rid'], response)
