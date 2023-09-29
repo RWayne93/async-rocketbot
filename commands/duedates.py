@@ -15,7 +15,7 @@ class CohortDueDates(CommandHandler):
             data = json.load(f)
 
         current_date = datetime.now().date()
-        week_end_date = current_date + timedelta(days=7)
+        week_end_date = current_date + timedelta(days=14)
         items_due_this_week = []
 
         for unit in data['Course']['units']:
